@@ -23,14 +23,14 @@ Ambos grupos completaron el mismo proceso, que incluía una página de inicio, t
 
 Los datos proporcionados se dividen en tres conjuntos principales:
 
-1. **Perfiles de los clientes (df_final_demo)**: Datos demográficos de los clientes como edad, género y detalles de cuenta. [Dataset](https://github.com/data-bootcamp-v4/lessons/blob/main/5_6_eda_inf_stats_tableau/project/files_for_project/df_final_demo.txt)
+1. **Perfiles de los clientes (df_final_demo)**: [Datos demográficos de los clientes como edad, género y detalles de cuenta.](https://github.com/data-bootcamp-v4/lessons/blob/main/5_6_eda_inf_stats_tableau/project/files_for_project/df_final_demo.txt)
   
 2. **Huella Digital (df_final_web_data)**: Registros de interacciones en línea, divididos en dos partes que deben combinarse antes del análisis.
 
-   - Parte 1: [Dataset pt_1](https://github.com/data-bootcamp-v4/lessons/blob/main/5_6_eda_inf_stats_tableau/project/files_for_project/df_final_web_data_pt_1.txt)
-   - Parte 2: [Dataset pt_2](https://github.com/data-bootcamp-v4/lessons/blob/main/5_6_eda_inf_stats_tableau/project/files_for_project/df_final_web_data_pt_2.txt)
+   - [Parte 1:](https://github.com/data-bootcamp-v4/lessons/blob/main/5_6_eda_inf_stats_tableau/project/files_for_project/df_final_web_data_pt_1.txt)
+   - [Parte 2:](https://github.com/data-bootcamp-v4/lessons/blob/main/5_6_eda_inf_stats_tableau/project/files_for_project/df_final_web_data_pt_2.txt)
 
-3. **Clientes del experimento (df_final_experiment_clients)**: Lista de clientes que participaron en el experimento. [Dataset](https://github.com/data-bootcamp-v4/lessons/blob/main/5_6_eda_inf_stats_tableau/project/files_for_project/df_final_experiment_clients.txt)
+3. **Clientes del experimento (df_final_experiment_clients)**: [Lista de clientes que participaron en el experimento.](https://github.com/data-bootcamp-v4/lessons/blob/main/5_6_eda_inf_stats_tableau/project/files_for_project/df_final_experiment_clients.txt)
 
 ## Configuración
 
