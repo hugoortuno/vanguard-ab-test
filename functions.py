@@ -128,17 +128,25 @@ print(f'Datos limpios y métricas agregadas guardados en: {output_file_path}')
 import pandas as pd
 import os
 
+# Cargar los dos archivos
 df_pt1 = pd.read_csv('data/df_final_web_data_pt_1.txt', delimiter=',')
 df_pt2 = pd.read_csv('data/df_final_web_data_pt_2.txt', delimiter=',')
 
+# Combinar los DataFrames
+df_combined = pd.concat([df_pt1, df_pt2], ignore_index=True)
+
 def procesar_dataframe(df, nombre_archivo):
+    # Renombrar las columnas
     df.columns = ['Identificador del cliente', 'Identificador del visitante', 'Identificador de la visita', 'Pasos del proceso', 'Fecha y hora']
+    
+    # Convertir la columna de fecha y hora
     df['Fecha y hora'] = pd.to_datetime(df['Fecha y hora'])
     df['Año'] = df['Fecha y hora'].dt.year
     df['Mes'] = df['Fecha y hora'].dt.month_name(locale='es_ES').str.capitalize()
     df['Día'] = df['Fecha y hora'].dt.day_name(locale='es_ES').str.capitalize()
     df['Fecha'] = df['Fecha y hora'].dt.day
 
+    # Renombrar los valores en la columna 'Pasos del proceso'
     renombrar_pasos = {
         'step_3': 'Paso 3',
         'step_2': 'Paso 2',
@@ -148,36 +156,48 @@ def procesar_dataframe(df, nombre_archivo):
     }
     df['Pasos del proceso'] = df['Pasos del proceso'].replace(renombrar_pasos)
 
-    print(f"Valores únicos en 'Pasos del proceso' para {nombre_archivo}: {df['Pasos del proceso'].unique()}")
+    # Mostrar valores únicos
+    print(f"Valores únicos en 'Pasos del proceso': {df['Pasos del proceso'].unique()}")
 
+    # Eliminar valores NaN
     df_cleaned = df.dropna()
 
+    # Calcular el total de visitas por cliente
     df_cleaned['Total de visitas por cliente'] = df_cleaned.groupby('Identificador del cliente')['Identificador de la visita'].transform('count')
+    
+    # Calcular la tasa de conversión
     total_visitas = df_cleaned['Identificador de la visita'].count()
     total_confirmaciones = df_cleaned[df_cleaned['Pasos del proceso'] == 'Confirmación']['Identificador de la visita'].count()
     tasa_conversion = (total_confirmaciones / total_visitas) * 100
     df_cleaned['Tasa de conversión'] = tasa_conversion
 
+    # Calcular diferencia de tiempo y tiempo total por cliente
     df_cleaned['Diferencia de tiempo'] = df_cleaned.groupby('Identificador del cliente')['Fecha y hora'].diff().dt.total_seconds()
     df_cleaned['Tiempo total por cliente'] = df_cleaned.groupby('Identificador del cliente')['Diferencia de tiempo'].transform('sum')
     df_cleaned['Tiempo en el paso'] = df_cleaned.groupby(['Identificador del cliente', 'Pasos del proceso'])['Fecha y hora'].diff().dt.total_seconds()
 
+    # Calcular tiempo promedio por paso
     tiempo_promedio_por_paso = df_cleaned.groupby('Pasos del proceso')['Diferencia de tiempo'].mean().reset_index()
     tiempo_promedio_por_paso.columns = ['Pasos del proceso', 'Tiempo promedio por paso en segundos']
     df_cleaned = df_cleaned.merge(tiempo_promedio_por_paso, on='Pasos del proceso', how='left')
 
+    # Calcular el tiempo total en el proceso
     df_cleaned['Tiempo total en proceso'] = df_cleaned.groupby('Identificador del cliente')['Diferencia de tiempo'].cumsum()
 
+    # Calcular el total de clientes únicos
     total_clientes_unicos = df_cleaned['Identificador del cliente'].nunique()
     df_cleaned['Total de clientes únicos'] = total_clientes_unicos
 
+    # Calcular la tasa de retención
     clientes_regresados = df_cleaned[df_cleaned.duplicated(subset='Identificador del cliente', keep=False)]['Identificador del cliente'].nunique()
     tasa_retencion = (clientes_regresados / total_clientes_unicos) * 100
     df_cleaned['Tasa de retención'] = tasa_retencion
 
+    # Calcular el promedio de visitas por cliente
     promedio_visitas_por_cliente = total_visitas / total_clientes_unicos
     df_cleaned['Promedio de visitas por cliente'] = promedio_visitas_por_cliente
 
+    # Guardar el archivo resultante
     output_folder = 'cleaned_data'
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -190,8 +210,8 @@ def procesar_dataframe(df, nombre_archivo):
     df_cleaned.to_excel(output_path, index=False)
     print(f"El archivo Excel '{nombre_archivo}.xlsx' se ha generado correctamente con las nuevas métricas y KPIs.")
 
-procesar_dataframe(df_pt1, 'cleaned_df_final_web_data_pt_1')
-procesar_dataframe(df_pt2, 'cleaned_df_final_web_data_pt_2')
+# Procesar el DataFrame combinado y generar el archivo final
+procesar_dataframe(df_combined, 'cleaned_df_final_web_data')
 
 # Bloque 3
 
