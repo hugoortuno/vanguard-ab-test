@@ -59,7 +59,7 @@ El proyecto se ha dividido en las siguientes etapas:
 
 5. **Visualizaciones en Power BI**
 
-   - Creación de visualizaciones interactivas. *Enlace pendiente*.
+   - Creación de visualizaciones interactivas. [Enlace a Power BI](https://app.powerbi.com/groups/me/reports/b64337b3-e815-4c3f-8dc8-e2c9d01b12bd/9d33cc8bf955c5a098ec?experience=power-bi).
 
 ## Preguntas clave
 
@@ -81,6 +81,4 @@ El código del proyecto está disponible en: [GitHub](https://github.com/hugoort
 
 ## Presentación
 
-Puedes revisar la presentación en [Canva]. *Enlace pendiente*.
-
- 
+Puedes revisar la presentación en [Canva](https://www.canva.com/design/DAGShL6sa34/pUpFJJv2Mg8v0Fr_yoBkog/edit?utm_content=DAGShL6sa34&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton).
