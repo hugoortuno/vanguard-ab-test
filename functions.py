@@ -9,131 +9,144 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import os
 
-# Crear las carpetas cleaned_data y views si no existen
-os.makedirs('cleaned_data', exist_ok=True)
-os.makedirs('views', exist_ok=True)
 
-# Cargar los datos desde el archivo de texto
-df = pd.read_csv('data/df_final_demo.txt', delimiter=',')
+def crear_carpetas():
+    # Crear las carpetas cleaned_data y views si no existen
+    os.makedirs('cleaned_data', exist_ok=True)
+    os.makedirs('views', exist_ok=True)
 
-# Renombrar las columnas a español
-df.columns = [
-    'ID del cliente', 
-    'Antigüedad en años', 
-    'Antigüedad en meses', 
-    'Edad', 
-    'Género', 
-    'Número de cuentas', 
-    'Saldo', 
-    'Llamadas en 6 meses', 
-    'Logins en 6 meses'
-]
 
-# 1. Verificación de valores atípicos
-# Gráfico de caja para el Saldo
-plt.figure(figsize=(12, 6))
-sns.boxplot(x=df['Saldo'])
-plt.title('Gráfico de caja para saldo')
-plt.xlabel('Saldo')
-plt.savefig('views/grafico_caja_saldo.png')  # Guardar el gráfico
-plt.close()
+def cargar_y_preparar_datos():
+    # Cargar los datos desde el archivo de texto
+    df = pd.read_csv('data/df_final_demo.txt', delimiter=',')
+    # Renombrar las columnas a español
+    df.columns = [
+        'Identificador del cliente', 
+        'Antigüedad en años', 
+        'Antigüedad en meses', 
+        'Edad', 
+        'Género', 
+        'Número de cuentas', 
+        'Saldo', 
+        'Llamadas en 6 meses', 
+        'Logins en 6 meses'
+    ]
+    return df
 
-# Gráfico de caja para Antigüedad en años
-plt.figure(figsize=(12, 6))
-sns.boxplot(x=df['Antigüedad en años'])
-plt.title('Gráfico de caja para antigüedad en años')
-plt.xlabel('Antigüedad en años')
-plt.savefig('views/grafico_caja_antiguedad.png')  # Guardar el gráfico
-plt.close()
 
-# Gráfico de caja para Edad
-plt.figure(figsize=(12, 6))
-sns.boxplot(x=df['Edad'])
-plt.title('Gráfico de caja para edad')
-plt.xlabel('Edad')
-plt.savefig('views/grafico_caja_edad.png')  # Guardar el gráfico
-plt.close()
+def verificar_valores_atipicos(df):
+    # Gráfico de caja para el Saldo
+    plt.figure(figsize=(12, 6))
+    sns.boxplot(x=df['Saldo'])
+    plt.title('Gráfico de caja para saldo')
+    plt.xlabel('Saldo')
+    plt.savefig('views/grafico_caja_saldo.png')  # Guardar el gráfico
+    plt.close()
 
-# 2. Tratamiento de Valores Nulos
-df.dropna(inplace=True)
+    # Gráfico de caja para Antigüedad en años
+    plt.figure(figsize=(12, 6))
+    sns.boxplot(x=df['Antigüedad en años'])
+    plt.title('Gráfico de caja para antigüedad en años')
+    plt.xlabel('Antigüedad en años')
+    plt.savefig('views/grafico_caja_antiguedad.png')  # Guardar el gráfico
+    plt.close()
 
-# 3. Conversión de Tipos de Datos
-df['Edad'] = df['Edad'].astype(int)
+    # Gráfico de caja para Edad
+    plt.figure(figsize=(12, 6))
+    sns.boxplot(x=df['Edad'])
+    plt.title('Gráfico de caja para edad')
+    plt.xlabel('Edad')
+    plt.savefig('views/grafico_caja_edad.png')  # Guardar el gráfico
+    plt.close()
 
-# Mapeo de valores en la columna 'Género'
-df['Género'] = df['Género'].replace({
-    'F': 'Mujer', 
-    'M': 'Hombre', 
-    'Desconocido': 'Indefinido',
-    'U': 'Indefinido', 
-    'x': 'Indefinido'
-})
 
-df = df[df['Género'].isin(['Mujer', 'Hombre', 'Indefinido'])]
-df['Género'] = df['Género'].astype('category')
+def tratamiento_valores_nulos(df):
+    df.dropna(inplace=True)
+    return df
 
-# 4. Análisis Exploratorio
-numeric_df = df.select_dtypes(include='number')
-correlation_matrix = numeric_df.corr()
 
-plt.figure(figsize=(10, 8))
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
-plt.title('Matriz de correlación')
-plt.savefig('views/matriz_correlacion.png')
-plt.close()
+def conversion_de_tipos(df):
+    df['Edad'] = df['Edad'].astype(int)
+    df['Género'] = df['Género'].replace({
+        'F': 'Mujer', 
+        'M': 'Hombre', 
+        'Desconocido': 'Indefinido',
+        'U': 'Indefinido', 
+        'x': 'Indefinido'
+    })
+    df = df[df['Género'].isin(['Mujer', 'Hombre', 'Indefinido'])]
+    df['Género'] = df['Género'].astype('category')
+    return df
 
-# Gráfico de dispersión: Antigüedad vs Saldo
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x='Antigüedad en años', y='Saldo', data=df)
-plt.title('Antigüedad en años vs saldo')
-plt.xlabel('Antigüedad en años')
-plt.ylabel('Saldo')
-plt.savefig('views/antiguedad_vs_saldo.png')
-plt.close()
 
-# 5. Modelo Predictivo
-X = df[['Antigüedad en años', 'Edad', 'Número de cuentas']]
-y = df['Saldo']
+def analisis_exploratorio(df):
+    numeric_df = df.select_dtypes(include='number')
+    correlation_matrix = numeric_df.corr()
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-model = LinearRegression()
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
+    plt.title('Matriz de correlación')
+    plt.savefig('views/matriz_correlacion.png')
+    plt.close()
 
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-print(f'MSE: {mse}')
-print(f'R^2: {r2}')
+    plt.figure(figsize=(10, 6))
+    sns.scatterplot(x='Antigüedad en años', y='Saldo', data=df)
+    plt.title('Antigüedad en años vs saldo')
+    plt.xlabel('Antigüedad en años')
+    plt.ylabel('Saldo')
+    plt.savefig('views/antiguedad_vs_saldo.png')
+    plt.close()
 
-# 6. Cálculo de nuevas métricas y agregarlas al DataFrame
-df['Media de saldo'] = df['Saldo'].mean()
-df['Desviación Estándar del saldo'] = df['Saldo'].std()
-df['Saldo mínimo'] = df['Saldo'].min()
-df['Saldo máximo'] = df['Saldo'].max()
-df['Total de clientes'] = len(df)
 
-promedio_antiguedad = df.groupby('Género', observed=True)['Antigüedad en años'].mean().rename('Promedio de antigüedad por género')
-df = df.join(promedio_antiguedad, on='Género')
+def modelo_predictivo(df):
+    X = df[['Antigüedad en años', 'Edad', 'Número de cuentas']]
+    y = df['Saldo']
 
-saldo_columns = ['Saldo', 'Media de saldo', 'Desviación Estándar del saldo', 'Saldo mínimo', 'Saldo máximo']
-for col in saldo_columns:
-    df[col] = df[col].apply(lambda x: f'€{x:,.2f}')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
 
-output_file_path = 'cleaned_data/cleaned_df_final_demo.xlsx'
-df.to_excel(output_file_path, index=False)
-print(f'Datos limpios y métricas agregadas guardados en: {output_file_path}')
+    mse = mean_squared_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+    print(f'MSE: {mse}')
+    print(f'R^2: {r2}')
 
-# Bloque 2
 
-import pandas as pd
-import os
+def agregar_rango_antiguedad_y_balance(df):
+    bins = [0, 18, 25, 35, 45, 55, 65, float('inf')]  # Definir los rangos de antigüedad
+    labels = ['1.Menores de edad', '2.18-25 años', '3.25-35 años', '4.35-45 años', '5.45-55 años', '6.55-65 años', '7.65+ años']
+    df['Rango de Edad'] = pd.cut(df['Edad'], bins=bins, labels=labels, right=False)
 
-# Cargar los dos archivos
-df_pt1 = pd.read_csv('data/df_final_web_data_pt_1.txt', delimiter=',')
-df_pt2 = pd.read_csv('data/df_final_web_data_pt_2.txt', delimiter=',')
+    bins = [0, 3, 5, 10, 15, 20, 25, 30, float('inf')]  # Definir los rangos de antigüedad
+    labels = ['1.Menos de 3 años', '2.3-5 años', '3.5-10 años', '4.10-15 años', '5.15-20 años', '6.20-25 años', '7.25-30 años', '8.30+ años']
+    df['Rango de antigüedad'] = pd.cut(df['Antigüedad en años'], bins=bins, labels=labels, right=False)
 
-# Combinar los DataFrames
-df_combined = pd.concat([df_pt1, df_pt2], ignore_index=True)
+    bins = [0, 10000, 20000, 50000, 100000, 250000, 500000, 1000000, 5000000, float('inf')]  # Definir los rangos por Saldo
+    labels = ['1.<10 mil', '2.10-20 mil', '3.20-50 mil', '4.50-100 mil', '5.100-250 mil', '6.250-500 mil', '7.500 mil-1 millón', '8.1-5 milones', '9.5+ millones']
+    df['Rango de saldo'] = pd.cut(df['Saldo'], bins=bins, labels=labels, right=False)
+  
+    return df
+
+
+def agregar_metricas(df):
+    df['Media de saldo'] = df['Saldo'].mean()
+    df['Desviación Estándar del saldo'] = df['Saldo'].std()
+    df['Saldo mínimo'] = df['Saldo'].min()
+    df['Saldo máximo'] = df['Saldo'].max()
+    df['Total de clientes'] = len(df)
+
+    promedio_antiguedad = df.groupby('Género', observed=True)['Antigüedad en años'].mean().rename('Promedio de antigüedad por género')
+    df = df.join(promedio_antiguedad, on='Género')
+
+    saldo_columns = ['Media de saldo', 'Desviación Estándar del saldo', 'Saldo mínimo', 'Saldo máximo']
+    for col in saldo_columns:
+        df[col] = df[col].apply(lambda x: f'€{x:,.2f}')
+
+    output_file_path = 'cleaned_data/cleaned_df_final_demo.xlsx'
+    df.to_excel(output_file_path, index=False)
+    print(f'Datos limpios y métricas agregadas guardados en: {output_file_path}')
+
 
 def procesar_dataframe(df, nombre_archivo):
     # Renombrar las columnas
@@ -148,11 +161,11 @@ def procesar_dataframe(df, nombre_archivo):
 
     # Renombrar los valores en la columna 'Pasos del proceso'
     renombrar_pasos = {
-        'step_3': 'Paso 3',
-        'step_2': 'Paso 2',
-        'step_1': 'Paso 1',
-        'start': 'Inicio',
-        'confirm': 'Confirmación'
+        'step_3': '3.Paso 3',
+        'step_2': '2.Paso 2',
+        'step_1': '1.Paso 1',
+        'start': '0.Inicio',
+        'confirm': '9.Confirmación'
     }
     df['Pasos del proceso'] = df['Pasos del proceso'].replace(renombrar_pasos)
 
@@ -161,6 +174,18 @@ def procesar_dataframe(df, nombre_archivo):
 
     # Eliminar valores NaN
     df_cleaned = df.dropna()
+
+    # Ordenar el DataFrame por 'Identificador de la visita' y 'Fecha y hora' por si acaso no están en orden
+    df_cleaned = df_cleaned.sort_values(by=['Identificador de la visita', 'Fecha y hora'])
+
+    # Desplazar la columna 'Fecha y hora' hacia arriba para obtener la fecha del siguiente paso
+    df_cleaned['Fecha y hora siguiente'] = df_cleaned.groupby('Identificador de la visita')['Fecha y hora'].shift(-1)
+
+    # Desplazar la columna 'Pasos del proceso' hacia arriba para obtener el nombre del siguiente paso
+    df_cleaned['Paso siguiente'] = df_cleaned.groupby('Identificador de la visita')['Pasos del proceso'].shift(-1)
+    
+    # Calcular la duración de cada paso
+    df_cleaned['Duración del paso'] = df_cleaned['Fecha y hora siguiente'] - df_cleaned['Fecha y hora']
 
     # Calcular el total de visitas por cliente
     df_cleaned['Total de visitas por cliente'] = df_cleaned.groupby('Identificador del cliente')['Identificador de la visita'].transform('count')
@@ -210,66 +235,3 @@ def procesar_dataframe(df, nombre_archivo):
     df_cleaned.to_excel(output_path, index=False)
     print(f"El archivo Excel '{nombre_archivo}.xlsx' se ha generado correctamente con las nuevas métricas y KPIs.")
 
-# Procesar el DataFrame combinado y generar el archivo final
-procesar_dataframe(df_combined, 'cleaned_df_final_web_data')
-
-# Bloque 3
-
-import pandas as pd
-import matplotlib.pyplot as plt
-import os
-
-# Ruta al archivo de texto
-file_path = 'data/df_final_experiment_clients.txt'
-
-# Cargar el archivo con delimitador ','
-df = pd.read_csv(file_path, delimiter=',')
-
-# Ver las primeras filas del DataFrame para entender la estructura
-print("Primeras filas del archivo:")
-print(df.head())
-
-# Información del DataFrame (tipos de datos de cada columna)
-print("\nInformación del DataFrame:")
-print(df.info())
-
-# Renombrar columnas a español
-columnas_traducidas = {
-    'client_id': 'Identificador del cliente',
-    'Variation': 'Variación',
-}
-
-df.rename(columns=columnas_traducidas, inplace=True)
-
-# Verificar los cambios
-print("\nColumnas renombradas:")
-print(df.columns)
-
-# Contar valores únicos en la columna 'Variación'
-variacion_counts = df['Variación'].value_counts()
-print("\nConteo de valores en la columna 'Variación':")
-print(variacion_counts)
-
-# Graficar la distribución
-plt.bar(variacion_counts.index, variacion_counts.values, color=['blue', 'orange'])
-plt.title('Distribución de la Variación')
-plt.xlabel('Variación')
-plt.ylabel('Número de Clientes')
-plt.xticks(rotation=0)
-plt.show()
-
-# Crear la carpeta cleaned_data si no existe
-os.makedirs('cleaned_data', exist_ok=True)
-
-# Guardar el DataFrame con columnas traducidas como archivo Excel
-output_file_path = 'cleaned_data/cleaned_df_final_experiment_clients.xlsx'
-df.to_excel(output_file_path, index=False)
-
-print(f"\nArchivo guardado como: {output_file_path}")
-
-# Opcional: análisis estadístico si hay otras columnas
-# Asegúrate de que hay una columna 'resultado' para el análisis
-if 'resultado' in df.columns:
-    resultados = df.groupby('Variación')['resultado'].describe()
-    print("\nEstadísticas descriptivas por grupo:")
-    print(resultados)
